@@ -15,7 +15,7 @@ public class AuthService {
     private final PasswordEncoder passwrodEncoder;
     private final JwtUtil jwtUtil;
 
-    
+
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwrodEncoder = passwordEncoder;
@@ -29,9 +29,10 @@ public class AuthService {
         if (!passwordPasses(user, login.password())) {
             throw new RuntimeException("FU");
         }
-        
+
         return generateToken(user);
     }
+
 
     private String generateToken(User user) {
         return jwtUtil.generateToken(user.getUsername());

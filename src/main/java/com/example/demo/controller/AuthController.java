@@ -19,4 +19,5 @@ public class AuthController {
     public String login(@RequestBody LoginDto login) {
         return authService.login(login);
     }
+
 }

@@ -13,7 +13,7 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "sssshh...";
+    private final String SECRET = "624938d7fa8990f2a224074ac19adf0782a39e37b50a30b5ead96ac02a0e03d2";
     private final Long expiration = 180000000L;
 
     public String generateToken(String username) {
