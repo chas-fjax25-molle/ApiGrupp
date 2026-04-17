@@ -3,18 +3,20 @@ package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.model.LoginDto;
+import com.example.demo.service.AuthService;
+
 @RestController
 public class AuthController {
+    private final AuthService authService;
+
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/login")
-    public String login(@RequestBody String body) {
-
-        // TODO:
-        // 1. Ta emot username + password
-        // 2. Autentisera via Spring
-        // 3. Generera JWT
-        // 4. Returnera token
-
-        return "TODO JWT";
+    public String login(@RequestBody LoginDto login) {
+        return authService.login(login);
     }
 }
