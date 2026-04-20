@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 
+import com.example.demo.exception.InvalidLoginException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,25 +17,22 @@ public class AuthService {
     private final PasswordEncoder passwrodEncoder;
     private final JwtUtil jwtUtil;
 
-
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwrodEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
     }
 
-
     public String login(LoginDto login) {
         var user = getUser(login.username());
 
         if (!passwordPasses(user, login.password())) {
-            throw new RuntimeException("FU");
+            throw new InvalidLoginException("Error: ");
         }
 
         return generateToken(user);
     }
-
-
+    
     private String generateToken(User user) {
         return jwtUtil.generateToken(user.getUsername());
     }
@@ -45,6 +44,4 @@ public class AuthService {
     private User getUser(String username) {
         return userRepository.findByUsername(username).orElseThrow();
     }
-
-
 }

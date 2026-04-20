@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.example.demo.model.User;
 import com.example.demo.repo.UserRepository;
+import com.example.demo.security.JwtUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,9 @@ public class SecurityTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
     
+    @Autowired
+    private JwtUtil jwtUtil;
+    
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
@@ -59,9 +63,9 @@ public class SecurityTest {
     }
 
     @Test
-    void getPrivate_withExpiredToken_returnsForbidden() throws Exception {
+    void getPrivate_withExpiredToken_returnsUnauthorized() throws Exception {
         // TODO: In real cases this should be read in from environment or similar
-        String secret = "624938d7fa8990f2a224074ac19adf0782a39e37b50a30b5ead96ac02a0e03d2!";
+        String secret = "624938d7fa8990f2a224074ac19adf0782a39e37b50a30b5ead96ac02a0e03d2";
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
 
         String expiredToken = Jwts.builder()
@@ -85,21 +89,52 @@ public class SecurityTest {
         
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON)
             .content("{\"username\": \"testuser\", \"password\": \"password\"}"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$.token").exists());
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
+    }
+
+    @Test
+    void login_withInvalidCredentials_returnsUnAuthorized() throws Exception {
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword(passwordEncoder.encode("password"));
+        userRepository.save(user);
+        
+        mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"username\": \"testuser\", \"password\": \"wrongpassword\"}"))
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
     void getPrivate_withValidToken_returns200() throws Exception {
-
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword(passwordEncoder.encode("password"));
+        userRepository.save(user);
+        
+        String validToken = jwtUtil.generateToken(user.getUsername());
+        
+        mockMvc.perform(get("/private").header("Authorization", "Bearer " + validToken))
+            .andExpect(status().isOk());
     }
 
     @Test
     void postMessages_withValidToken_returnsSuccess() throws Exception {
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword(passwordEncoder.encode("password"));
+        userRepository.save(user);
 
+        String validToken = jwtUtil.generateToken(user.getUsername());
+        
+        mockMvc.perform(post("/messages").header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"content\": \"Hej:)\"}"))
+            .andExpect(status().isOk());
     }
 
     @Test
     void getPublic_withoutToken_returns200() throws Exception {
-
+        mockMvc.perform(get("/public")).andExpect(status().isOk());
     }
 }
