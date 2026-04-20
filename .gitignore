@@ -39,3 +39,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+## DON'T PUSH SECRETS ##
+**.env
