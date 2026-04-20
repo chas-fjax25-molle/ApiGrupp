@@ -2,6 +2,7 @@ package com.example.demo.security;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (Exception e) {
-                response.setStatus(401);
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return;
             }
         }
